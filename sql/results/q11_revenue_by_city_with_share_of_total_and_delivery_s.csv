@@ -1,0 +1,14 @@
+city,orders,revenue_mln_kzt,revenue_share_pct,avg_delivery_days,avg_review
+Almaty,6864,1209.5,29.4,2.1,4.4
+Astana,5035,872.0,21.2,2.1,4.42
+Shymkent,2267,391.0,9.5,3.1,4.25
+Karaganda,1683,268.9,6.5,4.1,3.99
+Aktobe,1159,202.9,4.9,4.1,4.02
+Atyrau,1171,198.8,4.8,5.1,3.73
+Pavlodar,1044,183.2,4.5,4.1,4.06
+Kostanay,950,168.2,4.1,4.1,4.06
+Ust-Kamenogorsk,954,164.7,4.0,5.1,3.78
+Taraz,914,160.3,3.9,4.0,4.0
+Aktau,757,133.3,3.2,6.1,3.45
+Kyzylorda,692,122.6,3.0,5.1,3.75
+Unknown,218,36.6,0.9,3.0,4.25

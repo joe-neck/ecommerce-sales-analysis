@@ -1,0 +1,314 @@
+"""
+Build excel/dala_market_sales_report.xlsx:
+  README     - what is in the workbook and how to use it
+  Summary    - KPI block + monthly trend, all live SUMIFS/COUNTIFS formulas
+  Breakdown  - category, channel, city and promo tables (formulas) + charts
+  Orders     - order-level data (Excel Table)
+  Lines      - order-line data with category (Excel Table)
+
+Usage:  python scripts/build_excel_report.py   (then recalc in Excel / LibreOffice)
+"""
+from pathlib import Path
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.table import Table, TableStyleInfo
+
+ROOT = Path(__file__).resolve().parents[1]
+PROC = ROOT / "data" / "processed"
+OUT = ROOT / "excel" / "dala_market_sales_report.xlsx"
+OUT.parent.mkdir(exist_ok=True)
+
+# ------------------------------------------------------------------ data
+customers = pd.read_csv(PROC / "customers.csv")
+products = pd.read_csv(PROC / "products.csv")
+orders = pd.read_csv(PROC / "orders.csv", parse_dates=["order_date"])
+items = pd.read_csv(PROC / "order_items.csv")
+
+agg = items.groupby("order_id").agg(items=("quantity", "sum"), gross=("gross_revenue", "sum"),
+                                    discount=("discount_amount", "sum"), net=("net_revenue", "sum"),
+                                    cogs=("cogs", "sum"))
+o = (orders.merge(customers[["customer_id", "city", "acquisition_channel"]], on="customer_id")
+           .join(agg, on="order_id"))
+o["year"] = o["order_date"].dt.year.astype(str)
+o["month"] = o["order_date"].dt.strftime("%Y-%m")
+o["promo_code"] = o["promo_code"].fillna("(none)")
+o_cols = ["order_id", "order_date", "year", "month", "customer_id", "city", "acquisition_channel",
+          "status", "payment_method", "promo_code", "items", "gross", "discount", "net", "cogs",
+          "delivery_days", "review_score"]
+o = o[o_cols]
+
+ln = (items.merge(orders[["order_id", "order_date", "status"]], on="order_id")
+           .merge(products[["product_id", "product_name", "category", "brand"]], on="product_id"))
+ln["year"] = pd.to_datetime(ln["order_date"]).dt.year.astype(str)
+l_cols = ["order_item_id", "order_id", "order_date", "year", "status", "product_id", "product_name",
+          "category", "brand", "quantity", "unit_price", "discount_pct", "net_revenue", "cogs"]
+ln = ln[l_cols]
+
+# ------------------------------------------------------------------ styles
+FONT = "Arial"
+H = Font(name=FONT, bold=True, color="FFFFFF")
+HFILL = PatternFill("solid", fgColor="2A78D6")
+B = Font(name=FONT, bold=True)
+N = Font(name=FONT)
+T = Font(name=FONT, bold=True, size=16)
+ST = Font(name=FONT, bold=True, size=12, color="2A78D6")
+MUTE = Font(name=FONT, italic=True, color="52514E", size=9)
+KFILL = PatternFill("solid", fgColor="EEF5FE")
+thin = Side(style="thin", color="C3C2B7")
+BOX = Border(top=thin, bottom=thin, left=thin, right=thin)
+KZT = '#,##0;(#,##0);"-"'
+MLN = '#,##0.0,,"M";(#,##0.0,,"M");"-"'
+PCT = '0.0%;(0.0%);"-"'
+
+wb = Workbook()
+
+
+def header(ws, row, col, labels, width=None):
+    for j, lab in enumerate(labels):
+        c = ws.cell(row, col + j, lab)
+        c.font, c.fill, c.alignment, c.border = H, HFILL, Alignment(horizontal="center", wrap_text=True), BOX
+
+
+def cellf(ws, ref, value, fmt=None, font=N):
+    c = ws[ref]
+    c.value, c.font, c.border = value, font, BOX
+    if fmt:
+        c.number_format = fmt
+    return c
+
+
+def write_table(ws, df, name, fmts):
+    ws.append(list(df.columns))
+    for row in df.itertuples(index=False):
+        ws.append([None if pd.isna(v) else (v.to_pydatetime() if isinstance(v, pd.Timestamp) else v) for v in row])
+    ref = f"A1:{get_column_letter(df.shape[1])}{len(df) + 1}"
+    t = Table(displayName=name, ref=ref)
+    t.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True)
+    ws.add_table(t)
+    for j, col in enumerate(df.columns, start=1):
+        L = get_column_letter(j)
+        ws.column_dimensions[L].width = max(11, min(28, len(col) + 4))
+        if col in fmts:
+            for r in range(2, len(df) + 2):
+                ws[f"{L}{r}"].number_format = fmts[col]
+    for c in ws[1]:
+        c.font = Font(name=FONT, bold=True, color="FFFFFF")
+    ws.freeze_panes = "A2"
+
+
+# ------------------------------------------------------------------ README
+rd = wb.active
+rd.title = "README"
+rd["A1"] = "Dala Market — Sales Report 2024–2025"; rd["A1"].font = T
+lines = [
+    ("What this is", "Excel version of the e-commerce sales analysis. All summary numbers are live formulas over the data tabs."),
+    ("Currency", "All amounts in KZT (Kazakhstani tenge). 'M' = millions."),
+    ("Revenue definition", "Net revenue (after discounts) of DELIVERED orders. Returned and cancelled orders are excluded."),
+    ("Gross profit", "Net revenue − cost of goods (COGS)."),
+    ("Data source", "Synthetic dataset generated by scripts/generate_data.py (seed 42), cleaned by scripts/clean_data.py."),
+    ("", ""),
+    ("Tabs", ""),
+    ("Summary", "Headline KPIs by year and the monthly revenue trend with YoY growth + chart."),
+    ("Breakdown", "Category, acquisition channel, city and promo-code tables with charts."),
+    ("Orders", "One row per order (Excel Table 'tblOrders'). Insert ▸ PivotTable on it to explore further."),
+    ("Lines", "One row per order line with product category (Excel Table 'tblLines')."),
+    ("", ""),
+    ("How to use", "Change the year in Summary!C4 / D4 to compare other periods; every table recalculates."),
+    ("Input cells", "Blue text on light-blue fill = editable input. Everything else is a formula."),
+]
+for i, (a, b) in enumerate(lines, start=3):
+    rd.cell(i, 1, a).font = B
+    rd.cell(i, 2, b).font = N
+rd.column_dimensions["A"].width = 20
+rd.column_dimensions["B"].width = 110
+
+# ------------------------------------------------------------------ data tabs (needed for references)
+ws_o = wb.create_sheet("Orders")
+write_table(ws_o, o, "tblOrders", {"order_date": "yyyy-mm-dd", "gross": KZT, "discount": KZT, "net": KZT, "cogs": KZT})
+ws_l = wb.create_sheet("Lines")
+write_table(ws_l, ln, "tblLines", {"unit_price": KZT, "discount_pct": "0%", "net_revenue": KZT, "cogs": KZT})
+NO = len(o) + 1
+NL = len(ln) + 1
+
+
+def ocol(name):
+    return f"Orders!${get_column_letter(o_cols.index(name) + 1)}$2:${get_column_letter(o_cols.index(name) + 1)}${NO}"
+
+
+def lcol(name):
+    return f"Lines!${get_column_letter(l_cols.index(name) + 1)}$2:${get_column_letter(l_cols.index(name) + 1)}${NL}"
+
+
+O_YEAR, O_MONTH, O_STATUS, O_NET, O_COGS = ocol("year"), ocol("month"), ocol("status"), ocol("net"), ocol("cogs")
+O_DISC, O_REV, O_DEL = ocol("discount"), ocol("review_score"), ocol("delivery_days")
+DEL = '"delivered"'
+
+# ------------------------------------------------------------------ Summary
+s = wb.create_sheet("Summary", 1)
+s["B1"] = "Dala Market — Sales Summary"; s["B1"].font = T
+s["B2"] = "Revenue = net revenue of delivered orders, KZT. All values are formulas over the Orders tab."; s["B2"].font = MUTE
+
+header(s, 4, 2, ["KPI"])
+for ref, yr in [("C4", "2024"), ("D4", "2025")]:
+    c = s[ref]; c.value = yr
+    c.font = Font(name=FONT, bold=True, color="0000FF"); c.fill = KFILL; c.border = BOX
+    c.alignment = Alignment(horizontal="center")
+header(s, 4, 5, ["Change"])
+
+kpis = [
+    ("Net revenue", "=SUMIFS({net},{year},{Y},{st},{d})", MLN, "rel"),
+    ("Gross profit", "=SUMIFS({net},{year},{Y},{st},{d})-SUMIFS({cogs},{year},{Y},{st},{d})", MLN, "rel"),
+    ("Gross margin", "=IFERROR({c}6/{c}5,0)", PCT, "pp"),
+    ("Delivered orders", "=COUNTIFS({year},{Y},{st},{d})", "#,##0", "rel"),
+    ("Average order value (AOV)", "=IFERROR({c}5/{c}8,0)", KZT, "rel"),
+    ("Discounts given", "=SUMIFS({disc},{year},{Y},{st},{d})", MLN, "rel"),
+    ("Return rate (share of orders)", '=IFERROR(COUNTIFS({year},{Y},{st},"returned")/COUNTIFS({year},{Y}),0)', PCT, "pp"),
+    ("Cancellation rate", '=IFERROR(COUNTIFS({year},{Y},{st},"cancelled")/COUNTIFS({year},{Y}),0)', PCT, "pp"),
+    ("Average review score (1–5)", '=IFERROR(AVERAGEIFS({rev},{year},{Y},{rev},">0"),0)', "0.00", "abs"),
+    ("Average delivery days", '=IFERROR(AVERAGEIFS({del},{year},{Y},{st},{d}),0)', "0.0", "abs"),
+]
+for i, (lab, f, fmt, chg) in enumerate(kpis, start=5):
+    cellf(s, f"B{i}", lab, font=B)
+    for c in "CD":
+        formula = f.replace("{del}", O_DEL).format(net=O_NET, cogs=O_COGS, year=O_YEAR, st=O_STATUS, d=DEL,
+                                                   disc=O_DISC, rev=O_REV, c=c, Y=f"{c}$4")
+        cellf(s, f"{c}{i}", formula, fmt)
+    if chg == "rel":
+        cellf(s, f"E{i}", f"=IFERROR(D{i}/C{i}-1,0)", PCT)
+    elif chg == "pp":
+        cellf(s, f"E{i}", f"=D{i}-C{i}", '+0.0%;-0.0%;"-"')
+    else:
+        cellf(s, f"E{i}", f"=D{i}-C{i}", '+0.00;-0.00;"-"')
+s["B16"] = "Change: % growth for amounts and counts; percentage-point difference for rates."; s["B16"].font = MUTE
+
+# monthly trend
+s["B18"] = "Monthly net revenue"; s["B18"].font = ST
+header(s, 19, 2, ["Month", "2024", "2025", "YoY growth", "2025 share of year"])
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+for k, mname in enumerate(months, start=1):
+    r = 19 + k
+    cellf(s, f"B{r}", mname, font=B)
+    for col, yr in [("C", "2024"), ("D", "2025")]:
+        cellf(s, f"{col}{r}", f'=SUMIFS({O_NET},{O_MONTH},"{yr}-{k:02d}",{O_STATUS},{DEL})', MLN)
+    cellf(s, f"E{r}", f"=IFERROR(D{r}/C{r}-1,0)", PCT)
+    cellf(s, f"F{r}", f"=IFERROR(D{r}/D$32,0)", PCT)
+cellf(s, "B32", "Total", font=B)
+for col in "CD":
+    cellf(s, f"{col}32", f"=SUM({col}20:{col}31)", MLN, B)
+cellf(s, "E32", "=IFERROR(D32/C32-1,0)", PCT, B)
+cellf(s, "F32", "=SUM(F20:F31)", PCT, B)
+s["B33"] = "Check: total 2025 should equal Summary!D5 →"; s["B33"].font = MUTE
+cellf(s, "E33", '=IF(ABS(D32-D5)<1,"OK","MISMATCH")')
+
+lc = LineChart()
+lc.title = "Monthly net revenue, KZT"
+lc.height, lc.width = 8, 17
+lc.add_data(Reference(s, min_col=3, max_col=4, min_row=19, max_row=31), titles_from_data=True)
+lc.set_categories(Reference(s, min_col=2, min_row=20, max_row=31))
+lc.series[0].graphicalProperties.line.solidFill = "898781"
+lc.series[1].graphicalProperties.line.solidFill = "2A78D6"
+for sr in lc.series:
+    sr.graphicalProperties.line.width = 25000
+    sr.smooth = False
+lc.y_axis.numFmt = '#,##0,,"M"'
+lc.roundedCorners = False
+lc.legend.position = "b"; lc.legend.overlay = False
+lc.title.overlay = False
+lc.x_axis.delete = False; lc.y_axis.delete = False
+s.add_chart(lc, "H4")
+
+for col, w in zip("ABCDEF", [2, 32, 15, 15, 13, 17]):
+    s.column_dimensions[col].width = w
+s.sheet_view.showGridLines = False
+
+# ------------------------------------------------------------------ Breakdown
+b = wb.create_sheet("Breakdown", 2)
+b["B1"] = "Breakdowns — both years, delivered orders"; b["B1"].font = T
+b.sheet_view.showGridLines = False
+L_CAT, L_NET, L_COGS, L_ST = lcol("category"), lcol("net_revenue"), lcol("cogs"), lcol("status")
+
+
+def block(top, title, headers, keys, rows_fn, fmts):
+    b.cell(top, 2, title).font = ST
+    header(b, top + 1, 2, headers)
+    for i, key in enumerate(keys):
+        r = top + 2 + i
+        cellf(b, f"B{r}", key, font=B)
+        for j, (f, fmt) in enumerate(zip(rows_fn(r), fmts)):
+            cellf(b, f"{get_column_letter(3 + j)}{r}", f, fmt)
+    return top + 2, top + 1 + len(keys)
+
+
+cats = ln.groupby("category")["net_revenue"].sum().sort_values(ascending=False).index.tolist()
+c0, c1 = block(3, "1. Category profitability", ["Category", "Net revenue", "Gross profit", "Margin", "Revenue share", "Return rate (lines)"],
+               cats, lambda r: [
+                   f"=SUMIFS({L_NET},{L_CAT},$B{r},{L_ST},{DEL})",
+                   f"=C{r}-SUMIFS({L_COGS},{L_CAT},$B{r},{L_ST},{DEL})",
+                   f"=IFERROR(D{r}/C{r},0)",
+                   f"=IFERROR(C{r}/SUM($C$5:$C${4 + len(cats)}),0)",
+                   f'=IFERROR(COUNTIFS({L_CAT},$B{r},{L_ST},"returned")/COUNTIFS({L_CAT},$B{r}),0)'],
+               [MLN, MLN, PCT, PCT, PCT])
+
+O_CH, O_CITY, O_PROMO = ocol("acquisition_channel"), ocol("city"), ocol("promo_code")
+chs = customers["acquisition_channel"].value_counts().index.tolist()
+k0, k1 = block(c1 + 3, "2. Acquisition channels", ["Channel", "Customers", "Net revenue", "Gross profit", "Profit / customer", "Return rate (orders)"],
+               chs, lambda r: [
+                   int((customers["acquisition_channel"] == b.cell(r, 2).value).sum()),
+                   f"=SUMIFS({O_NET},{O_CH},$B{r},{O_STATUS},{DEL})",
+                   f"=D{r}-SUMIFS({O_COGS},{O_CH},$B{r},{O_STATUS},{DEL})",
+                   f"=IFERROR(E{r}/C{r},0)",
+                   f'=IFERROR(COUNTIFS({O_CH},$B{r},{O_STATUS},"returned")/COUNTIFS({O_CH},$B{r}),0)'],
+               ["#,##0", MLN, MLN, KZT, PCT])
+b.cell(k1 + 1, 2, "Customers per channel = registered customers (from customers.csv); hardcoded because the Orders tab has buyers only.").font = MUTE
+for r in range(k0, k1 + 1):
+    b[f"C{r}"].font = Font(name=FONT, color="0000FF")
+
+cities = o.loc[o.status == "delivered"].groupby("city")["net"].sum().sort_values(ascending=False).index.tolist()
+t0, t1 = block(k1 + 4, "3. Cities", ["City", "Delivered orders", "Net revenue", "Revenue share", "Avg delivery days", "Avg review"],
+               cities, lambda r: [
+                   f"=COUNTIFS({O_CITY},$B{r},{O_STATUS},{DEL})",
+                   f"=SUMIFS({O_NET},{O_CITY},$B{r},{O_STATUS},{DEL})",
+                   f"=IFERROR(D{r}/SUM($D${k1 + 6}:$D${k1 + 5 + len(cities)}),0)",
+                   f"=IFERROR(AVERAGEIFS({O_DEL},{O_CITY},$B{r},{O_STATUS},{DEL}),0)",
+                   f'=IFERROR(AVERAGEIFS({O_REV},{O_CITY},$B{r},{O_STATUS},{DEL},{O_REV},">0"),0)'],
+               ["#,##0", MLN, PCT, "0.0", "0.00"])
+
+promos = o["promo_code"].value_counts().index.tolist()
+p0, p1 = block(t1 + 3, "4. Promo codes", ["Promo code", "Delivered orders", "Net revenue", "Discount given", "Gross margin", "AOV"],
+               promos, lambda r: [
+                   f"=COUNTIFS({O_PROMO},$B{r},{O_STATUS},{DEL})",
+                   f"=SUMIFS({O_NET},{O_PROMO},$B{r},{O_STATUS},{DEL})",
+                   f"=SUMIFS({O_DISC},{O_PROMO},$B{r},{O_STATUS},{DEL})",
+                   f"=IFERROR(1-SUMIFS({O_COGS},{O_PROMO},$B{r},{O_STATUS},{DEL})/D{r},0)",
+                   f"=IFERROR(D{r}/C{r},0)"],
+               ["#,##0", MLN, MLN, PCT, KZT])
+
+for col, w in zip("ABCDEFG", [2, 22, 15, 15, 15, 17, 18]):
+    b.column_dimensions[col].width = w
+
+
+def bar(title, cats_ref, data_ref, anchor, fmt, color="2A78D6"):
+    ch = BarChart(); ch.type = "bar"; ch.style = 10
+    ch.title = title; ch.height, ch.width = 7.5, 15
+    ch.add_data(data_ref, titles_from_data=True); ch.set_categories(cats_ref)
+    ch.series[0].graphicalProperties.solidFill = color
+    ch.series[0].graphicalProperties.line.noFill = True
+    ch.y_axis.numFmt = fmt; ch.x_axis.scaling.orientation = "maxMin"
+    ch.legend = None; ch.roundedCorners = False; ch.title.overlay = False
+    ch.x_axis.delete = False; ch.y_axis.delete = False; ch.gapWidth = 60
+    b.add_chart(ch, anchor)
+
+
+bar("Net revenue by category", Reference(b, min_col=2, min_row=c0, max_row=c1),
+    Reference(b, min_col=3, min_row=c0 - 1, max_row=c1), "I3", '#,##0,,"M"')
+bar("Gross margin by category", Reference(b, min_col=2, min_row=c0, max_row=c1),
+    Reference(b, min_col=5, min_row=c0 - 1, max_row=c1), "I19", "0%", "1BAF7A")
+bar("Gross profit per customer by channel, KZT", Reference(b, min_col=2, min_row=k0, max_row=k1),
+    Reference(b, min_col=6, min_row=k0 - 1, max_row=k1), "I35", "#,##0")
+
+wb.move_sheet("README", -10)
+wb.save(OUT)
+print("saved", OUT.relative_to(ROOT))

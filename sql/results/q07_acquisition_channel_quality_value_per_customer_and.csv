@@ -1,0 +1,7 @@
+acquisition_channel,customers,orders_per_customer,return_rate_pct,revenue_per_customer_kzt,profit_per_customer_kzt
+Email,1191,2.82,6.5,444938.0,81128.0
+Referral,1825,2.69,5.3,415142.0,76009.0
+Organic Search,2850,2.44,6.4,383615.0,69006.0
+Paid Search,2447,1.94,7.4,300859.0,54440.0
+Instagram,2089,1.91,7.2,299770.0,53580.0
+TikTok,1598,1.5,11.6,230627.0,40260.0

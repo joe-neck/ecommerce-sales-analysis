@@ -1,0 +1,7 @@
+segment,customers,customers_pct,avg_recency_days,avg_orders,revenue_mln_kzt,revenue_pct
+At Risk (high value),2062,18.0,419.0,2.59,1229.5,29.9
+Loyal,1616,14.1,122.0,3.29,909.6,22.1
+New / Promising,3196,27.8,44.0,1.44,774.4,18.8
+Champions,605,5.3,50.0,4.53,482.5,11.7
+Need Attention,1476,12.8,193.0,1.49,396.4,9.6
+Hibernating,2532,22.0,456.0,1.38,319.4,7.8

@@ -1,0 +1,4 @@
+delivery_bucket,orders,avg_review,low_review_pct,return_rate_pct
+1-2 days,9723,4.43,1.6,6.6
+3-4 days,10329,4.12,3.6,6.6
+5+ days,5493,3.36,16.9,9.4

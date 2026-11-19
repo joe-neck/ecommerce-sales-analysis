@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dala Market — Sales Dashboard 2024–2025</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --prev: #898781; --up: #006300; --down: #d03b3b; --wash: rgba(42,120,214,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --prev: #898781; --up: #0ca30c; --down: #e66767; --wash: rgba(57,135,229,0.14);
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --prev: #898781; --up: #0ca30c; --down: #e66767; --wash: rgba(57,135,229,0.14);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root { background: var(--page); color: var(--ink); min-height: 100vh;
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 28px clamp(14px, 3vw, 40px) 48px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+header h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+header p { margin: 0; color: var(--ink2); }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 22px 0 18px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; color: var(--ink2); padding: 7px 14px; font: inherit; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--s1); color: #fff; font-weight: 600; }
+label.sel { display: inline-flex; gap: 8px; align-items: center; color: var(--ink2); }
+select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+.reset { font: inherit; color: var(--s1); background: none; border: 0; cursor: pointer; padding: 6px 4px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .lab { color: var(--ink2); font-size: 12.5px; }
+.tile .val { font-size: 26px; font-weight: 650; margin: 2px 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.tile .sub { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tile .sub .up { color: var(--up); font-weight: 600; } .tile .sub .down { color: var(--down); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px 12px; min-width: 0; }
+.card.wide { grid-column: 1 / -1; }
+.card-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.card h2 { font-size: 15px; margin: 0; }
+.card .note { color: var(--muted); font-size: 12.5px; margin: 0 0 8px; }
+.tbtn { font: inherit; font-size: 12.5px; color: var(--ink2); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink2); margin: 0 0 4px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+svg { display: block; width: 100%; overflow: visible; }
+svg text { fill: var(--muted); font-size: 11.5px; }
+svg .lbl { fill: var(--ink2); font-size: 12px; }
+svg .val { fill: var(--ink2); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.hit { fill: transparent; cursor: default; }
+.bar-g:hover .bar { opacity: 0.82; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 8px; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink2); font-weight: 600; }
+.tbl { display: none; max-height: 340px; overflow: auto; }
+.card.show-table .tbl { display: block; } .card.show-table .chart { display: none; }
+#tip { position: fixed; pointer-events: none; z-index: 10; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); opacity: 0; transition: opacity .08s; min-width: 150px; }
+#tip b { display: block; margin-bottom: 3px; }
+#tip .r { display: flex; justify-content: space-between; gap: 14px; color: var(--ink2); }
+#tip .r span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+#tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 22px; }
+footer a { color: var(--s1); }
+@media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <header>
+    <h1>Dala Market — Sales Dashboard</h1>
+    <p>Online electronics store, Kazakhstan · Jan 2024 – Dec 2025 · amounts in KZT (₸) · revenue = net revenue of delivered orders</p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filters">
+    <div class="seg" id="yearSeg" role="group" aria-label="Year">
+      <button data-y="all" aria-pressed="true">Both years</button>
+      <button data-y="2024" aria-pressed="false">2024</button>
+      <button data-y="2025" aria-pressed="false">2025</button>
+    </div>
+    <label class="sel">City <select id="citySel"></select></label>
+    <label class="sel">Channel <select id="chSel"></select></label>
+    <button class="reset" id="reset">Reset</button>
+  </div>
+
+  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
+
+  <div class="grid">
+    <div class="card wide" id="c-month">
+      <div class="card-h"><h2>Monthly net revenue — 2025 vs 2024</h2><button class="tbtn">Table</button></div>
+      <p class="note">Always compares both years; city and channel filters apply.</p>
+      <div class="legend"><span><i style="background:var(--prev)"></i>2024</span><span><i style="background:var(--s1)"></i>2025</span></div>
+      <div class="chart"></div><div class="tbl"></div>
+    </div>
+    <div class="card" id="c-cat">
+      <div class="card-h"><h2>Net revenue by category</h2><button class="tbtn">Table</button></div>
+      <p class="note">Label shows gross margin — big sellers earn the least per tenge.</p>
+      <div class="chart"></div><div class="tbl"></div>
+    </div>
+    <div class="card" id="c-ch">
+      <div class="card-h"><h2>Net revenue by acquisition channel</h2><button class="tbtn">Table</button></div>
+      <p class="note">Label shows order return rate.</p>
+      <div class="chart"></div><div class="tbl"></div>
+    </div>
+    <div class="card" id="c-city">
+      <div class="card-h"><h2>Net revenue by city</h2><button class="tbtn">Table</button></div>
+      <p class="note">Label shows average delivery days.</p>
+      <div class="chart"></div><div class="tbl"></div>
+    </div>
+    <div class="card" id="c-promo">
+      <div class="card-h"><h2>Gross margin by promo code</h2><button class="tbtn">Table</button></div>
+      <p class="note">Full-price orders vs each campaign. Orange = margin below 5%.</p>
+      <div class="chart"></div><div class="tbl"></div>
+    </div>
+  </div>
+
+  <footer>
+    Synthetic data generated for a portfolio project · Built with Python, SQL and vanilla JS/SVG ·
+    Medet Makhambetkhan
+  </footer>
+</div>
+<div id="tip" role="tooltip"></div>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const state = { year: "all", city: -1, ch: -1 };
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const yearOf = mi => +D.months[mi].slice(0, 4);
+const pass = r => (state.city < 0 || r[1] === state.city) && (state.ch < 0 || r[2] === state.ch);
+const inYear = (mi, y) => y === "all" || yearOf(mi) === +y;
+const css = v => getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(v).trim();
+
+// ---------- formatting ----------
+const nf0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const money = v => Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(2) + " bn ₸"
+                 : Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + "M ₸" : nf0.format(v) + " ₸";
+const mShort = v => Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(1) + "bn" : (v / 1e6).toFixed(0) + "M";
+const pct = (v, d = 1) => isFinite(v) ? (100 * v).toFixed(d) + "%" : "–";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function niceStep(max, n) {
+  const p = Math.pow(10, Math.floor(Math.log10(max / n)));
+  return [1, 2, 2.5, 5, 10].map(k => k * p).find(t => max / t <= n) || 10 * p;
+}
+const mAxis = v => v >= 1e9 ? (v / 1e9).toFixed(v % 1e9 ? 1 : 0) + "bn" : v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : (v / 1e3).toFixed(0) + "k";
+
+// ---------- aggregation ----------
+function kpi(y) {
+  const k = { d: 0, rev: 0, cogs: 0, n: 0, ret: 0, rs: 0, rc: 0, ds: 0 };
+  for (const r of D.o) if (pass(r) && inYear(r[0], y)) {
+    k.d += r[4]; k.rev += r[5]; k.cogs += r[6]; k.n += r[7]; k.ret += r[8]; k.rs += r[9]; k.rc += r[10]; k.ds += r[11];
+  }
+  return { rev: k.rev, profit: k.rev - k.cogs, margin: (k.rev - k.cogs) / k.rev, orders: k.d,
+           aov: k.rev / k.d, ret: k.ret / k.n, review: k.rs / k.rc, deliv: k.ds / k.d };
+}
+function groupO(keyIdx, names) {
+  const g = names.map(() => ({ d: 0, rev: 0, cogs: 0, n: 0, ret: 0, ds: 0 }));
+  for (const r of D.o) if (pass(r) && inYear(r[0], state.year)) {
+    const x = g[r[keyIdx]]; x.d += r[4]; x.rev += r[5]; x.cogs += r[6]; x.n += r[7]; x.ret += r[8]; x.ds += r[11];
+  }
+  return g.map((x, i) => ({ name: names[i], ...x }));
+}
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function showTip(e, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 14;
+  if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => (tip.style.opacity = 0);
+const row = (k, v, col) => `<div class="r"><span>${col ? `<i class="sw" style="background:${col}"></i>` : ""}${esc(k)}</span><span>${v}</span></div>`;
+
+// ---------- KPI tiles ----------
+function renderKpis() {
+  const cur = kpi(state.year);
+  const prev = state.year === "2025" ? kpi("2024") : null;
+  const per = state.year === "all" ? "2024–2025" : state.year;
+  const delta = (a, b, mode) => {
+    if (!prev || !isFinite(a) || !isFinite(b)) return `<span>${per}</span>`;
+    const d = mode === "rel" ? a / b - 1 : a - b;
+    const good = mode === "inv" ? d < 0 : d > 0;
+    const txt = mode === "rel" ? pct(Math.abs(d)) : mode === "pp" || mode === "inv" ? (100 * Math.abs(d)).toFixed(1) + " pp" : Math.abs(d).toFixed(2);
+    return `<span class="${good ? "up" : "down"}">${d >= 0 ? "▲" : "▼"} ${txt}</span> vs 2024`;
+  };
+  const tiles = [
+    ["Net revenue", money(cur.rev), delta(cur.rev, prev?.rev, "rel")],
+    ["Gross profit", money(cur.profit), `margin ${pct(cur.margin)}${prev ? " · " + delta(cur.margin, prev.margin, "pp") : ""}`],
+    ["Delivered orders", nf0.format(cur.orders), delta(cur.orders, prev?.orders, "rel")],
+    ["Average order value", money(cur.aov), delta(cur.aov, prev?.aov, "rel")],
+    ["Return rate", pct(cur.ret), delta(cur.ret, prev?.ret, "inv")],
+    ["Avg review · delivery", `${isFinite(cur.review) ? cur.review.toFixed(2) : "–"} ★`, `${isFinite(cur.deliv) ? cur.deliv.toFixed(1) : "–"} days to deliver`],
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(([l, v, s]) =>
+    `<div class="tile"><div class="lab">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join("");
+}
+
+// ---------- line chart ----------
+function renderMonthly() {
+  const card = document.getElementById("c-month"), box = card.querySelector(".chart");
+  const s = { 2024: Array(12).fill(0), 2025: Array(12).fill(0) };
+  for (const r of D.o) if (pass(r)) s[yearOf(r[0])][+D.months[r[0]].slice(5) - 1] += r[5];
+  const W = Math.max(320, box.clientWidth), H = 280, m = { l: 52, r: 44, t: 12, b: 26 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const raw = Math.max(...s[2024], ...s[2025]) || 1;
+  const tickStep = niceStep(raw, 5), max = Math.ceil(raw / tickStep) * tickStep;
+  const x = i => m.l + (iw * i) / 11, y = v => m.t + ih - (ih * v) / max;
+  let g = "";
+  for (let t = 0; t <= max; t += tickStep)
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)"/>` +
+         `<text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${t === 0 ? "0" : mAxis(t)}</text>`;
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--axis)"/>`;
+  MONTHS.forEach((mn, i) => g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${mn}</text>`);
+  const path = arr => arr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  for (const [yr, col] of [[2024, "var(--prev)"], [2025, "var(--s1)"]]) {
+    g += `<path d="${path(s[yr])}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>`;
+    g += `<text class="lbl" x="${x(11) + 8}" y="${y(s[yr][11]) + 4}" style="font-weight:600">${yr}</text>`;
+  }
+  g += `<g id="xh" style="display:none"><line id="xhl" y1="${m.t}" y2="${m.t + ih}" stroke="var(--axis)"/>` +
+       `<circle id="xh1" r="4.5" fill="var(--prev)" stroke="var(--surface)" stroke-width="2"/>` +
+       `<circle id="xh2" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/></g>`;
+  g += `<rect class="hit" id="mhit" x="${m.l - 10}" y="${m.t}" width="${iw + 20}" height="${ih}"/>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Monthly net revenue 2024 and 2025">${g}</svg>`;
+  const svg = box.querySelector("svg"), xh = svg.querySelector("#xh");
+  svg.querySelector("#mhit").addEventListener("mousemove", e => {
+    const pt = svg.getBoundingClientRect(), sx = (e.clientX - pt.left) * (W / pt.width);
+    const i = Math.max(0, Math.min(11, Math.round(((sx - m.l) / iw) * 11)));
+    xh.style.display = ""; svg.querySelector("#xhl").setAttribute("x1", x(i)); svg.querySelector("#xhl").setAttribute("x2", x(i));
+    const c1 = svg.querySelector("#xh1"), c2 = svg.querySelector("#xh2");
+    c1.setAttribute("cx", x(i)); c1.setAttribute("cy", y(s[2024][i])); c2.setAttribute("cx", x(i)); c2.setAttribute("cy", y(s[2025][i]));
+    const yoy = s[2025][i] / s[2024][i] - 1;
+    showTip(e, `<b>${MONTHS[i]}</b>${row("2025", money(s[2025][i]), css("--s1"))}${row("2024", money(s[2024][i]), css("--prev"))}${row("YoY", (yoy >= 0 ? "+" : "") + pct(yoy))}`);
+  });
+  svg.querySelector("#mhit").addEventListener("mouseleave", () => { xh.style.display = "none"; hideTip(); });
+  card.querySelector(".tbl").innerHTML = table(["Month", "2024", "2025", "YoY"],
+    MONTHS.map((mn, i) => [mn, money(s[2024][i]), money(s[2025][i]), pct(s[2025][i] / s[2024][i] - 1)]));
+}
+
+// ---------- horizontal bars ----------
+function hbars(id, rows, { valueOf, label, tipOf, colorOf, fmtAxis }) {
+  const card = document.getElementById(id), box = card.querySelector(".chart");
+  const W = Math.max(300, box.clientWidth), bh = 20, gap = 10, m = { l: 118, r: 70, t: 4, b: 22 };
+  const H = m.t + m.b + rows.length * (bh + gap) - gap, iw = W - m.l - m.r;
+  const raw = Math.max(...rows.map(valueOf), 0) || 1;
+  const step = niceStep(raw, 4), max = Math.ceil(raw / step) * step;
+  const x = v => (iw * Math.max(0, v)) / max;
+  let g = `<line x1="${m.l}" x2="${m.l}" y1="${m.t - 2}" y2="${H - m.b + 2}" stroke="var(--axis)"/>`;
+  for (let t = step; t <= max + step / 1e6; t += step) {
+    g += `<line x1="${m.l + x(t)}" x2="${m.l + x(t)}" y1="${m.t - 2}" y2="${H - m.b}" stroke="var(--grid)"/>` +
+         `<text x="${m.l + x(t)}" y="${H - 6}" text-anchor="middle">${fmtAxis(t)}</text>`;
+  }
+  rows.forEach((r, i) => {
+    const yy = m.t + i * (bh + gap), w = x(valueOf(r));
+    const rr = Math.min(4, w / 2);
+    const d = w > 0 ? `M${m.l},${yy}h${w - rr}a${rr},${rr} 0 0 1 ${rr},${rr}v${bh - 2 * rr}a${rr},${rr} 0 0 1 -${rr},${rr}h-${w - rr}z` : "";
+    g += `<g class="bar-g" data-i="${i}"><rect class="hit" x="0" y="${yy - gap / 2}" width="${W}" height="${bh + gap}"/>` +
+         `<text class="lbl" x="${m.l - 8}" y="${yy + bh / 2 + 4}" text-anchor="end">${esc(r.name)}</text>` +
+         `<path class="bar" d="${d}" fill="${colorOf ? colorOf(r) : "var(--s1)"}"/>` +
+         `<text class="val" x="${m.l + w + 6}" y="${yy + bh / 2 + 4}">${label(r)}</text></g>`;
+  });
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">${g}</svg>`;
+  box.querySelectorAll(".bar-g").forEach(el => {
+    el.addEventListener("mousemove", e => showTip(e, tipOf(rows[+el.dataset.i])));
+    el.addEventListener("mouseleave", hideTip);
+  });
+}
+function table(head, rows) {
+  return `<table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+}
+
+function renderCategory() {
+  const g = D.cats.map(name => ({ name, rev: 0, cogs: 0 }));
+  for (const r of D.l) if (pass(r) && inYear(r[0], state.year)) { g[r[3]].rev += r[4]; g[r[3]].cogs += r[5]; }
+  const tot = g.reduce((a, b) => a + b.rev, 0);
+  const rows = g.map(r => ({ ...r, margin: (r.rev - r.cogs) / r.rev, share: r.rev / tot })).sort((a, b) => b.rev - a.rev);
+  hbars("c-cat", rows, { valueOf: r => r.rev, fmtAxis: mAxis, label: r => pct(r.margin, 0) + " margin",
+    tipOf: r => `<b>${esc(r.name)}</b>${row("Net revenue", money(r.rev))}${row("Share", pct(r.share))}${row("Gross profit", money(r.rev - r.cogs))}${row("Margin", pct(r.margin))}` });
+  document.querySelector("#c-cat .tbl").innerHTML = table(["Category", "Net revenue", "Share", "Gross profit", "Margin"],
+    rows.map(r => [r.name, money(r.rev), pct(r.share), money(r.rev - r.cogs), pct(r.margin)]));
+}
+function renderChannel() {
+  const rows = groupO(2, D.channels).filter(r => r.n > 0).sort((a, b) => b.rev - a.rev);
+  hbars("c-ch", rows, { valueOf: r => r.rev, fmtAxis: mAxis, label: r => pct(r.ret / r.n) + " ret.",
+    tipOf: r => `<b>${esc(r.name)}</b>${row("Net revenue", money(r.rev))}${row("Delivered orders", nf0.format(r.d))}${row("AOV", money(r.rev / r.d))}${row("Margin", pct((r.rev - r.cogs) / r.rev))}${row("Return rate", pct(r.ret / r.n))}` });
+  document.querySelector("#c-ch .tbl").innerHTML = table(["Channel", "Net revenue", "Orders", "AOV", "Return rate"],
+    rows.map(r => [r.name, money(r.rev), nf0.format(r.d), money(r.rev / r.d), pct(r.ret / r.n)]));
+}
+function renderCity() {
+  const rows = groupO(1, D.cities).filter(r => r.n > 0).sort((a, b) => b.rev - a.rev);
+  const tot = rows.reduce((a, b) => a + b.rev, 0);
+  hbars("c-city", rows, { valueOf: r => r.rev, fmtAxis: mAxis, label: r => (r.ds / r.d).toFixed(1) + " days",
+    tipOf: r => `<b>${esc(r.name)}</b>${row("Net revenue", money(r.rev))}${row("Share", pct(r.rev / tot))}${row("Delivered orders", nf0.format(r.d))}${row("Avg delivery", (r.ds / r.d).toFixed(1) + " days")}` });
+  document.querySelector("#c-city .tbl").innerHTML = table(["City", "Net revenue", "Share", "Orders", "Avg delivery (days)"],
+    rows.map(r => [r.name, money(r.rev), pct(r.rev / tot), nf0.format(r.d), (r.ds / r.d).toFixed(1)]));
+}
+function renderPromo() {
+  const rows = groupO(3, D.promos).filter(r => r.d > 0).map(r => ({ ...r, margin: (r.rev - r.cogs) / r.rev }))
+                .sort((a, b) => b.margin - a.margin);
+  hbars("c-promo", rows, { valueOf: r => r.margin, fmtAxis: v => pct(v, 0), label: r => pct(r.margin),
+    colorOf: r => r.name === "(none)" ? "var(--prev)" : r.margin < 0.05 ? "var(--s2)" : "var(--s1)",
+    tipOf: r => `<b>${esc(r.name)}</b>${row("Gross margin", pct(r.margin))}${row("Delivered orders", nf0.format(r.d))}${row("Net revenue", money(r.rev))}${row("AOV", money(r.rev / r.d))}` });
+  document.querySelector("#c-promo .tbl").innerHTML = table(["Promo code", "Gross margin", "Orders", "Net revenue", "AOV"],
+    rows.map(r => [r.name, pct(r.margin), nf0.format(r.d), money(r.rev), money(r.rev / r.d)]));
+}
+
+function render() { renderKpis(); renderMonthly(); renderCategory(); renderChannel(); renderCity(); renderPromo(); }
+
+// ---------- controls ----------
+const citySel = document.getElementById("citySel"), chSel = document.getElementById("chSel");
+citySel.innerHTML = `<option value="-1">All cities</option>` + D.cities.map((c, i) => `<option value="${i}">${esc(c)}</option>`).join("");
+chSel.innerHTML = `<option value="-1">All channels</option>` + D.channels.map((c, i) => `<option value="${i}">${esc(c)}</option>`).join("");
+document.querySelectorAll("#yearSeg button").forEach(b => b.addEventListener("click", () => {
+  state.year = b.dataset.y;
+  document.querySelectorAll("#yearSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+citySel.addEventListener("change", () => { state.city = +citySel.value; render(); });
+chSel.addEventListener("change", () => { state.ch = +chSel.value; render(); });
+document.getElementById("reset").addEventListener("click", () => {
+  state.year = "all"; state.city = -1; state.ch = -1; citySel.value = -1; chSel.value = -1;
+  document.querySelectorAll("#yearSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.y === "all"));
+  render();
+});
+document.querySelectorAll(".tbtn").forEach(b => b.addEventListener("click", () => {
+  const c = b.closest(".card"); c.classList.toggle("show-table");
+  b.textContent = c.classList.contains("show-table") ? "Chart" : "Table";
+}));
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 120); });
+render();
+</script>
+</body>
+</html>

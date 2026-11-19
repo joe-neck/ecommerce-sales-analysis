@@ -1,0 +1,161 @@
+product_id,product_name,category,brand,unit_price,unit_cost
+P0001,Samsung Phone Mini 14,Smartphones,Samsung,107990,88762
+P0002,Samsung Phone 11,Smartphones,Samsung,404990,339023
+P0003,Samsung Phone Max 4,Smartphones,Samsung,218990,190595
+P0004,Samsung Phone Lite 9,Smartphones,Samsung,561990,476843
+P0005,Apple Phone Max 6,Smartphones,Apple,101990,85038
+P0006,Apple Phone Lite 13,Smartphones,Apple,402990,351261
+P0007,Apple Phone Mini 14,Smartphones,Apple,612990,507893
+P0008,Apple Phone Pro 16,Smartphones,Apple,131990,113863
+P0009,Xiaomi Phone 15,Smartphones,Xiaomi,609990,533091
+P0010,Xiaomi Phone Lite 16,Smartphones,Xiaomi,186990,161267
+P0011,Xiaomi Phone Mini 5,Smartphones,Xiaomi,115990,99977
+P0012,Xiaomi Phone Max 18,Smartphones,Xiaomi,140990,119336
+P0013,Honor Phone Lite 17,Smartphones,Honor,466990,390226
+P0014,Honor Phone Mini 8,Smartphones,Honor,158990,134410
+P0015,Honor Phone 16,Smartphones,Honor,118990,105188
+P0016,Honor Phone Max 2,Smartphones,Honor,426990,361580
+P0017,Realme Phone 12,Smartphones,Realme,118990,106001
+P0018,Realme Phone Max 17,Smartphones,Realme,336990,290591
+P0019,Realme Phone Lite 12,Smartphones,Realme,407990,346474
+P0020,Realme Phone Pro 16,Smartphones,Realme,268990,230057
+P0021,Lenovo 2-in-1 2,Laptops,Lenovo,390990,336354
+P0022,Lenovo Notebook 14 6,Laptops,Lenovo,238990,215163
+P0023,Lenovo Gaming Laptop 4,Laptops,Lenovo,332990,290922
+P0024,Lenovo Notebook 15 12,Laptops,Lenovo,663990,579994
+P0025,ASUS 2-in-1 2,Laptops,ASUS,249990,217350
+P0026,ASUS Gaming Laptop 18,Laptops,ASUS,421990,383467
+P0027,ASUS Notebook 14 11,Laptops,ASUS,272990,237845
+P0028,ASUS Notebook 15 6,Laptops,ASUS,411990,368042
+P0029,HP 2-in-1 8,Laptops,HP,259990,221685
+P0030,HP Notebook 14 18,Laptops,HP,589990,531811
+P0031,HP Gaming Laptop 6,Laptops,HP,861990,746042
+P0032,HP Ultrabook 14,Laptops,HP,413990,372981
+P0033,Apple 2-in-1 5,Laptops,Apple,338990,298126
+P0034,Apple Notebook 15 2,Laptops,Apple,281990,242522
+P0035,Apple Ultrabook 15,Laptops,Apple,605990,539182
+P0036,Apple Notebook 14 3,Laptops,Apple,531990,467679
+P0037,Acer Gaming Laptop 13,Laptops,Acer,440990,395528
+P0038,Acer Notebook 15 4,Laptops,Acer,253990,223223
+P0039,Acer Notebook 14 19,Laptops,Acer,279990,239459
+P0040,Acer Ultrabook 12,Laptops,Acer,358990,315422
+P0041,JBL Soundbar 16,Audio,JBL,11990,8117
+P0042,JBL Wireless Earbuds 4,Audio,JBL,38990,23758
+P0043,JBL Neckband 12,Audio,JBL,36990,26261
+P0044,JBL Bluetooth Speaker 17,Audio,JBL,23990,16119
+P0045,Sony Soundbar 7,Audio,Sony,13990,9330
+P0046,Sony Bluetooth Speaker 3,Audio,Sony,66990,47417
+P0047,Sony Wireless Earbuds 18,Audio,Sony,64990,41655
+P0048,Sony Headphones 15,Audio,Sony,11990,7345
+P0049,Apple Neckband 8,Audio,Apple,107990,67900
+P0050,Apple Soundbar 13,Audio,Apple,22990,13956
+P0051,Apple Wireless Earbuds 7,Audio,Apple,41990,29880
+P0052,Apple Headphones 11,Audio,Apple,148990,108064
+P0053,Marshall Headphones 6,Audio,Marshall,84990,52386
+P0054,Marshall Bluetooth Speaker 18,Audio,Marshall,42990,30205
+P0055,Marshall Wireless Earbuds 9,Audio,Marshall,90990,59212
+P0056,Marshall Neckband 8,Audio,Marshall,11990,7649
+P0057,Xiaomi Bluetooth Speaker 4,Audio,Xiaomi,108990,79237
+P0058,Xiaomi Soundbar 14,Audio,Xiaomi,14990,9895
+P0059,Xiaomi Wireless Earbuds 17,Audio,Xiaomi,15990,11248
+P0060,Xiaomi Neckband 10,Audio,Xiaomi,91990,55583
+P0061,Philips Coffee Machine 19,Home Appliances,Philips,36990,27324
+P0062,Philips Vacuum Cleaner 4,Home Appliances,Philips,107990,79555
+P0063,Philips Air Purifier 17,Home Appliances,Philips,133990,106660
+P0064,Philips Air Fryer 16,Home Appliances,Philips,197990,144794
+P0065,Bosch Vacuum Cleaner 9,Home Appliances,Bosch,59990,45675
+P0066,Bosch Air Fryer 11,Home Appliances,Bosch,169990,119898
+P0067,Bosch Air Purifier 7,Home Appliances,Bosch,361990,295752
+P0068,Bosch Blender 17,Home Appliances,Bosch,123990,92239
+P0069,Tefal Blender 15,Home Appliances,Tefal,139990,99118
+P0070,Tefal Air Purifier 16,Home Appliances,Tefal,96990,70398
+P0071,Tefal Vacuum Cleaner 7,Home Appliances,Tefal,25990,20971
+P0072,Tefal Coffee Machine 16,Home Appliances,Tefal,249990,198013
+P0073,Dyson Vacuum Cleaner 12,Home Appliances,Dyson,81990,63550
+P0074,Dyson Air Fryer 19,Home Appliances,Dyson,85990,63785
+P0075,Dyson Blender 17,Home Appliances,Dyson,92990,73486
+P0076,Dyson Air Purifier 17,Home Appliances,Dyson,49990,36517
+P0077,Midea Air Purifier 7,Home Appliances,Midea,37990,27392
+P0078,Midea Vacuum Cleaner 7,Home Appliances,Midea,37990,26953
+P0079,Midea Coffee Machine 12,Home Appliances,Midea,39990,31425
+P0080,Midea Air Fryer 4,Home Appliances,Midea,34990,28603
+P0081,Xiaomi Smart Bulb 12,Smart Home,Xiaomi,47990,30759
+P0082,Xiaomi Smart Speaker 15,Smart Home,Xiaomi,16990,10607
+P0083,Xiaomi Smart Plug 17,Smart Home,Xiaomi,78990,54778
+P0084,Xiaomi Door Sensor 6,Smart Home,Xiaomi,11990,7967
+P0085,TP-Link Door Sensor 18,Smart Home,TP-Link,19990,12423
+P0086,TP-Link Wi-Fi Camera 3,Smart Home,TP-Link,74990,51909
+P0087,TP-Link Smart Bulb 17,Smart Home,TP-Link,96990,66451
+P0088,TP-Link Smart Plug 17,Smart Home,TP-Link,90990,50323
+P0089,Yandex Smart Bulb 16,Smart Home,Yandex,9990,6190
+P0090,Yandex Door Sensor 17,Smart Home,Yandex,29990,17135
+P0091,Yandex Wi-Fi Camera 10,Smart Home,Yandex,20990,12679
+P0092,Yandex Smart Speaker 9,Smart Home,Yandex,14990,10179
+P0093,Aqara Smart Plug 9,Smart Home,Aqara,19990,13011
+P0094,Aqara Smart Speaker 8,Smart Home,Aqara,48990,32111
+P0095,Aqara Wi-Fi Camera 17,Smart Home,Aqara,103990,58499
+P0096,Aqara Smart Bulb 10,Smart Home,Aqara,17990,11148
+P0097,Tuya Door Sensor 11,Smart Home,Tuya,41990,27578
+P0098,Tuya Wi-Fi Camera 12,Smart Home,Tuya,55990,37493
+P0099,Tuya Smart Speaker 14,Smart Home,Tuya,80990,55088
+P0100,Tuya Smart Plug 13,Smart Home,Tuya,39990,27423
+P0101,Anker Phone Case 9,Accessories,Anker,30990,13630
+P0102,Anker Power Bank 12,Accessories,Anker,19990,8815
+P0103,Anker USB-C Cable 14,Accessories,Anker,29990,16474
+P0104,Anker Screen Protector 12,Accessories,Anker,2990,1426
+P0105,Baseus Charger 65W 10,Accessories,Baseus,9990,4468
+P0106,Baseus Screen Protector 6,Accessories,Baseus,20990,10528
+P0107,Baseus Phone Case 12,Accessories,Baseus,28990,16700
+P0108,Baseus USB-C Cable 10,Accessories,Baseus,2990,1742
+P0109,Ugreen Charger 65W 16,Accessories,Ugreen,5990,2518
+P0110,Ugreen Phone Case 15,Accessories,Ugreen,4990,2631
+P0111,Ugreen Power Bank 19,Accessories,Ugreen,5990,3405
+P0112,Ugreen Screen Protector 4,Accessories,Ugreen,29990,15367
+P0113,Samsung Charger 65W 18,Accessories,Samsung,19990,10077
+P0114,Samsung USB-C Cable 2,Accessories,Samsung,6990,2815
+P0115,Samsung Phone Case 14,Accessories,Samsung,30990,17860
+P0116,Samsung Power Bank 4,Accessories,Samsung,23990,11337
+P0117,Xiaomi Screen Protector 9,Accessories,Xiaomi,7990,3475
+P0118,Xiaomi USB-C Cable 7,Accessories,Xiaomi,7990,4087
+P0119,Xiaomi Power Bank 15,Accessories,Xiaomi,5990,2494
+P0120,Xiaomi Phone Case 16,Accessories,Xiaomi,2990,1198
+P0121,Sony Gaming Mouse 3,Gaming,Sony,348990,266440
+P0122,Sony Console 14,Gaming,Sony,115990,97228
+P0123,Sony Gaming Headset 18,Gaming,Sony,15990,13091
+P0124,Sony Gamepad 16,Gaming,Sony,23990,17969
+P0125,Logitech Gaming Mouse 16,Gaming,Logitech,14990,12641
+P0126,Logitech Console 12,Gaming,Logitech,186990,153143
+P0127,Logitech Gamepad 14,Gaming,Logitech,217990,183670
+P0128,Logitech Gaming Headset 16,Gaming,Logitech,278990,209138
+P0129,HyperX Keyboard 5,Gaming,HyperX,21990,17249
+P0130,HyperX Gaming Headset 3,Gaming,HyperX,156990,120584
+P0131,HyperX Gamepad 17,Gaming,HyperX,23990,18100
+P0132,HyperX Gaming Mouse 3,Gaming,HyperX,27990,22806
+P0133,Razer Keyboard 5,Gaming,Razer,104990,88663
+P0134,Razer Gamepad 17,Gaming,Razer,139990,115841
+P0135,Razer Gaming Mouse 8,Gaming,Razer,19990,16515
+P0136,Razer Gaming Headset 19,Gaming,Razer,63990,47869
+P0137,Nintendo Gaming Mouse 19,Gaming,Nintendo,38990,30212
+P0138,Nintendo Gaming Headset 9,Gaming,Nintendo,135990,104114
+P0139,Nintendo Console 18,Gaming,Nintendo,23990,18806
+P0140,Nintendo Gamepad 4,Gaming,Nintendo,53990,42563
+P0141,Philips Epilator 9,Beauty Tech,Philips,41990,26641
+P0142,Philips Electric Toothbrush 13,Beauty Tech,Philips,39990,26504
+P0143,Philips Hair Dryer 12,Beauty Tech,Philips,22990,14659
+P0144,Philips Styler 7,Beauty Tech,Philips,12990,8592
+P0145,Dyson Electric Toothbrush 12,Beauty Tech,Dyson,91990,57888
+P0146,Dyson Epilator 6,Beauty Tech,Dyson,79990,54052
+P0147,Dyson Trimmer 16,Beauty Tech,Dyson,58990,38910
+P0148,Dyson Hair Dryer 19,Beauty Tech,Dyson,73990,49537
+P0149,Braun Electric Toothbrush 6,Beauty Tech,Braun,51990,33646
+P0150,Braun Styler 16,Beauty Tech,Braun,29990,18077
+P0151,Braun Trimmer 3,Beauty Tech,Braun,50990,35886
+P0152,Braun Epilator 3,Beauty Tech,Braun,138990,98992
+P0153,Rowenta Electric Toothbrush 7,Beauty Tech,Rowenta,103990,74659
+P0154,Rowenta Trimmer 9,Beauty Tech,Rowenta,132990,79805
+P0155,Rowenta Hair Dryer 8,Beauty Tech,Rowenta,18990,12075
+P0156,Rowenta Styler 11,Beauty Tech,Rowenta,16990,11365
+P0157,Xiaomi Electric Toothbrush 15,Beauty Tech,Xiaomi,88990,55284
+P0158,Xiaomi Trimmer 8,Beauty Tech,Xiaomi,76990,55317
+P0159,Xiaomi Hair Dryer 10,Beauty Tech,Xiaomi,21990,14216
+P0160,Xiaomi Styler 4,Beauty Tech,Xiaomi,18990,11449
